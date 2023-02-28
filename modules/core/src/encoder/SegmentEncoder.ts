@@ -2,79 +2,14 @@ import {Base64Url} from './Base64Url.js';
 import {BitLength} from './BitLength.js';
 import {FieldEncoderMap, IntEncoder, VendorVectorEncoder} from './field/index.js';
 import {FieldSequence} from './sequence/index.js';
-import {EncodingError, DecodingError} from '../errors/index.js';
+import {DecodingError} from '../errors/index.js';
 import {Fields} from '../model/Fields.js';
-import {Segment, SegmentIDs} from '../model/index.js';
-import {TCModel, TCModelPropType} from '../index.js';
+import {Segment} from '../model/index.js';
+import {TCModel} from '../index.js';
 
 export class SegmentEncoder {
 
   private static fieldSequence: FieldSequence = new FieldSequence();
-
-  public static encode(tcModel: TCModel, segment: Segment): string {
-
-    let sequence;
-
-    try {
-
-      sequence = this.fieldSequence[String(tcModel.version)][segment];
-
-    } catch (err) {
-
-      throw new EncodingError(`Unable to encode version: ${tcModel.version}, segment: ${segment}`);
-
-    }
-
-    let bitField = '';
-
-    /**
-     * If this is anything other than the core segment we have a "segment id"
-     * to append to the front of the string
-     */
-    if (segment !== Segment.CORE) {
-
-      bitField = IntEncoder.encode(SegmentIDs.KEY_TO_ID[segment], BitLength.segmentType);
-
-    }
-
-    const fieldEncoderMap = FieldEncoderMap();
-    sequence.forEach((key: string): void => {
-
-      const value: TCModelPropType = tcModel[key];
-      const encoder = fieldEncoderMap[key];
-      let numBits: number = BitLength[key];
-
-      if (numBits === undefined) {
-
-        if (this.isPublisherCustom(key)) {
-
-          /**
-           * publisherCustom[Consents | LegitimateInterests] are an edge case
-           * because they are of variable length. The length is defined in a
-           * separate field named numCustomPurposes.
-           */
-          numBits = Number(tcModel[Fields.numCustomPurposes]);
-
-        }
-
-      }
-
-      try {
-
-        bitField += encoder.encode(value, numBits);
-
-      } catch (err) {
-
-        throw new EncodingError(`Error encoding ${segment}->${key}: ${err.message}`);
-
-      }
-
-    });
-
-    // base64url encode the string and return
-    return Base64Url.encode(bitField);
-
-  }
 
   public static decode(encodedString: string, tcModel: TCModel, segment: string): TCModel {
 

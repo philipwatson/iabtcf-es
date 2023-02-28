@@ -3,21 +3,6 @@ import {DecodingError} from '../../errors/index.js';
 import {Vector} from '../../model/index.js';
 
 export class FixedVectorEncoder {
-
-  public static encode(value: Vector, numBits: number): string {
-
-    let bitString = '';
-
-    for (let i = 1; i <= numBits; i++) {
-
-      bitString += BooleanEncoder.encode(value.has(i));
-
-    }
-
-    return bitString;
-
-  }
-
   public static decode(value: string, numBits: number): Vector {
 
     if (value.length !== numBits) {

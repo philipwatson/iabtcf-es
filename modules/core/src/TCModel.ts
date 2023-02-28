@@ -1,6 +1,5 @@
 import {Cloneable} from './Cloneable.js';
 import {TCModelError} from './errors/index.js';
-import {GVL} from './GVL.js';
 import {ConsentLanguages, IntMap, PurposeRestrictionVector, Vector} from './model/index.js';
 import {Purpose} from './model/gvl/index.js';
 
@@ -12,7 +11,7 @@ export class TCModel extends Cloneable<TCModel> {
   /**
    * Set of available consent languages published by the IAB
    */
-  public static readonly consentLanguages: ConsentLanguages = GVL.consentLanguages;
+  public static readonly consentLanguages: ConsentLanguages = new ConsentLanguages();
 
   private isServiceSpecific_ = false;
   private supportOOB_ = true;
@@ -27,9 +26,6 @@ export class TCModel extends Cloneable<TCModel> {
   private cmpVersion_: StringOrNumber = 0;
   private vendorListVersion_: StringOrNumber = 0;
   private numCustomPurposes_ = 0;
-
-  // Member Variable for GVL
-  private gvl_: GVL;
 
   public created: Date;
   public lastUpdated: Date;
@@ -127,50 +123,12 @@ export class TCModel extends Cloneable<TCModel> {
    * as this TCModel may be constructed from decoding an existing encoded
    * TCString.
    *
-   * @param {GVL} [gvl]
    */
-  public constructor(gvl?: GVL) {
+  public constructor() {
 
     super();
 
-    if (gvl) {
-
-      this.gvl = gvl;
-
-    }
-
     this.updated();
-
-  }
-
-  /**
-   * sets the [[GVL]] with side effects of also setting the `vendorListVersion`, `policyVersion`, and `consentLanguage`
-   * @param {GVL} gvl
-   */
-  public set gvl(gvl: GVL) {
-
-    /**
-     * set the reference, but make sure it's our GVL wrapper class.
-     */
-
-    if (!(GVL.isInstanceOf(gvl))) {
-
-      gvl = new GVL(gvl);
-
-    }
-
-    this.gvl_ = gvl;
-    this.publisherRestrictions.gvl = gvl;
-
-  }
-
-  /**
-   * @return {GVL} the gvl instance set on this TCModel instance
-   */
-  public get gvl(): GVL {
-
-    return this.gvl_;
-
   }
 
   /**
@@ -338,17 +296,7 @@ export class TCModel extends Cloneable<TCModel> {
   }
 
   public get vendorListVersion(): StringOrNumber {
-
-    if (this.gvl) {
-
-      return this.gvl.vendorListVersion;
-
-    } else {
-
       return this.vendorListVersion_;
-
-    }
-
   }
 
   /**
@@ -377,17 +325,7 @@ export class TCModel extends Cloneable<TCModel> {
   }
 
   public get policyVersion(): StringOrNumber {
-
-    if (this.gvl) {
-
-      return this.gvl.tcfPolicyVersion;
-
-    } else {
-
-      return this.policyVersion_;
-
-    }
-
+    return this.policyVersion_;
   }
 
   public set version(num: StringOrNumber) {
@@ -489,149 +427,6 @@ export class TCModel extends Cloneable<TCModel> {
   }
 
   /**
-   * setAllVendorConsents - sets all vendors on the GVL Consent (true)
-   *
-   * @return {void}
-   */
-  public setAllVendorConsents(): void {
-
-    this.vendorConsents.set(this.gvl.vendors);
-
-  }
-
-  /**
-   * unsetAllVendorConsents - unsets all vendors on the GVL Consent (false)
-   *
-   * @return {void}
-   */
-  public unsetAllVendorConsents(): void {
-
-    this.vendorConsents.empty();
-
-  }
-
-  /**
-   * setAllVendorsDisclosed - sets all vendors on the GVL Vendors Disclosed (true)
-   *
-   * @return {void}
-   */
-  public setAllVendorsDisclosed(): void {
-
-    this.vendorsDisclosed.set(this.gvl.vendors);
-
-  }
-
-  /**
-   * unsetAllVendorsDisclosed - unsets all vendors on the GVL Consent (false)
-   *
-   * @return {void}
-   */
-  public unsetAllVendorsDisclosed(): void {
-
-    this.vendorsDisclosed.empty();
-
-  }
-
-  /**
-   * setAllVendorsAllowed - sets all vendors on the GVL Consent (true)
-   *
-   * @return {void}
-   */
-  public setAllVendorsAllowed(): void {
-
-    this.vendorsAllowed.set(this.gvl.vendors);
-
-  }
-
-  /**
-   * unsetAllVendorsAllowed - unsets all vendors on the GVL Consent (false)
-   *
-   * @return {void}
-   */
-  public unsetAllVendorsAllowed(): void {
-
-    this.vendorsAllowed.empty();
-
-  }
-
-  /**
-   * setAllVendorLegitimateInterests - sets all vendors on the GVL LegitimateInterests (true)
-   *
-   * @return {void}
-   */
-  public setAllVendorLegitimateInterests(): void {
-
-    this.vendorLegitimateInterests.set(this.gvl.vendors);
-
-  }
-
-  /**
-   * unsetAllVendorLegitimateInterests - unsets all vendors on the GVL LegitimateInterests (false)
-   *
-   * @return {void}
-   */
-  public unsetAllVendorLegitimateInterests(): void {
-
-    this.vendorLegitimateInterests.empty();
-
-  }
-
-  /**
-   * setAllPurposeConsents - sets all purposes on the GVL Consent (true)
-   *
-   * @return {void}
-   */
-  public setAllPurposeConsents(): void {
-
-    this.purposeConsents.set(this.gvl.purposes);
-
-  }
-
-  /**
-   * unsetAllPurposeConsents - unsets all purposes on the GVL Consent (false)
-   *
-   * @return {void}
-   */
-  public unsetAllPurposeConsents(): void {
-
-    this.purposeConsents.empty();
-
-  }
-
-  /**
-   * setAllPurposeLegitimateInterests - sets all purposes on the GVL LI Transparency (true)
-   *
-   * @return {void}
-   */
-  public setAllPurposeLegitimateInterests(): void {
-
-    this.purposeLegitimateInterests.set(this.gvl.purposes);
-
-  }
-
-  /**
-   * unsetAllPurposeLegitimateInterests - unsets all purposes on the GVL LI Transparency (false)
-   *
-   * @return {void}
-   */
-  public unsetAllPurposeLegitimateInterests(): void {
-
-    this.purposeLegitimateInterests.empty();
-
-  }
-
-  /**
-   * setAllSpecialFeatureOptins - sets all special featuresOptins on the GVL (true)
-   *
-   * @return {void}
-   */
-  public setAllSpecialFeatureOptins(): void {
-
-    this.specialFeatureOptins.set(this.gvl.specialFeatures);
-
-  }
-
-  /**
    * unsetAllSpecialFeatureOptins - unsets all special featuresOptins on the GVL (true)
    *
    * @return {void}
@@ -639,26 +434,6 @@ export class TCModel extends Cloneable<TCModel> {
   public unsetAllSpecialFeatureOptins(): void {
 
     this.specialFeatureOptins.empty();
-
-  }
-
-  public setAll(): void {
-
-    this.setAllVendorConsents();
-    this.setAllPurposeLegitimateInterests();
-    this.setAllSpecialFeatureOptins();
-    this.setAllPurposeConsents();
-    this.setAllVendorLegitimateInterests();
-
-  }
-
-  public unsetAll(): void {
-
-    this.unsetAllVendorConsents();
-    this.unsetAllPurposeLegitimateInterests();
-    this.unsetAllSpecialFeatureOptins();
-    this.unsetAllPurposeConsents();
-    this.unsetAllVendorLegitimateInterests();
 
   }
 

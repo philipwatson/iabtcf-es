@@ -1,10 +1,7 @@
 import {
   Base64Url,
   BitLength,
-  EncodingOptions,
   SegmentEncoder,
-  SegmentSequence,
-  SemanticPreEncoder,
 } from './encoder/index.js';
 
 import {Segment, SegmentIDs} from './model/index.js';
@@ -16,51 +13,6 @@ import {TCModel} from './TCModel.js';
  * TCF Transparency and Consent String
  */
 export class TCString {
-
-  /**
-   * encodes a model into a TCString
-   *
-   * @param {TCModel} tcModel - model to convert into encoded string
-   * @param {EncodingOptions} options - for encoding options other than default
-   * @return {string} - base64url encoded Transparency and Consent String
-   */
-  public static encode(tcModel: TCModel, options?: EncodingOptions): string {
-
-    let out = '';
-    let sequence: Segment[];
-
-    tcModel = SemanticPreEncoder.process(tcModel, options);
-
-    /**
-       * If they pass in a special segment sequence.
-       */
-    if (Array.isArray(options?.segments)) {
-
-      sequence = options.segments;
-
-    } else {
-
-      sequence = new SegmentSequence(tcModel, options)[''+tcModel.version];
-
-    }
-
-    sequence.forEach((segment: Segment, idx: number): void => {
-
-      let dotMaybe = '';
-
-      if (idx < sequence.length - 1) {
-
-        dotMaybe = '.';
-
-      }
-
-      out += SegmentEncoder.encode(tcModel, segment) + dotMaybe;
-
-    });
-
-    return out;
-
-  }
 
   /**
    * Decodes a string into a TCModel
