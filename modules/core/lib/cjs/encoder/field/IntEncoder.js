@@ -1,0 +1,1 @@
+"use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.IntEncoder=void 0;var index_js_1=require("../../errors/index.js"),IntEncoder=function(){function e(){}return e.decode=function(e,n){if(n!==e.length)throw new index_js_1.DecodingError("invalid bit length");return parseInt(e,2)},e}();exports.IntEncoder=IntEncoder;
